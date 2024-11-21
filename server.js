@@ -1,7 +1,22 @@
 import express from 'express';
+//NUNCA ESQUECER DO .js NO FINAL//
+import conectarAoBanco from './src/config/db_config.js';
+const conexao = await conectarAoBanco(process.env.STRING_DE_CONEXAO);
+
 
 const app = express();
 app.use(express.json());
+
+
+// Utiliza async/await para realizar a consulta de forma assíncrona, evitando bloquear a execução do código.
+async function getTODOSPOSTS(){
+// Essa função busca todos os documentos da coleção "dados_alura" no banco de dados "sample_mflix".
+    const db = conexao.db("sample_mflix")
+    const collection = db.collection("dados_alura")
+    // Retorna um array com todos os documentos encontrado
+    return collection.find().toArray()
+
+}
 
 const port = 3000
 const posts = [
@@ -36,28 +51,9 @@ app.listen(port,() => {
     console.log("Servidor escutando...");
 });
 
-//Criação de rota
-app.get("/api", (req, res) => {
-    // status code 200 significa que esta OK // 
-    res.status(200).send("rota inicial");
-});
-
-//Criação de rota => req = requisicao, res = resposta do servidor
-app.get("/games",(req, res) => {
-
-    //o status code tem que ser igual a 200, se for envie oq foi solicitado//
-    res.status(200).send(
-        {
-            "nome_do_jogo": "Valorant",
-            "empresa_desenvolvedora": "Riot Games",
-            "ano": 2020,
-            "genero": "FPS"
-          }
-    );
-});
-
-app.get("/posts", (req, res) => {
-    res.status(200).json(posts);
+app.get("/posts", async (req, res) => {
+    const resultado = await getTODOSPOSTS()
+    res.status(200).json(resultado);
 });
 
 //função para percorrer cada id dos objetos, buscando pelo index de cada objeto 
